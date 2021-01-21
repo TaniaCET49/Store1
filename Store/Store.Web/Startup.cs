@@ -28,7 +28,7 @@ namespace Store.Web
                 cfg.UseSqlServer(this.Configuration.GetConnectionString("DefaultConnection"));
             });
 
-            
+            services.AddTransient<SeedBD>();
 
             services.Configure<CookiePolicyOptions>(options =>
             {
