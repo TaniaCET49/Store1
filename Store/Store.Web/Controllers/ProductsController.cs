@@ -1,9 +1,6 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
+﻿using System.Linq;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.AspNetCore.Mvc.Rendering;
 using Microsoft.EntityFrameworkCore;
 using Store.Web.Data;
 using Store.Web.Data.Entities;
@@ -12,131 +9,129 @@ namespace Store.Web.Controllers
 {
     public class ProductsController : Controller
     {
-        private readonly IRepository repository;
+        private readonly IProductRepository productRepository;
 
-        public ProductsController(IRepository repository)
-        {
-            this.repository = repository;
+        public ProductsController(IProductRepository productRepository)
+		{
+            this.productRepository = productRepository;
         }
 
-        // GET: Products
-        public IActionResult Index()
-        {
-            return View(this.repository.GetProducts());
-        }
+		// GET: Produtos
+		public IActionResult Index()
+		{
+			return View(this.productRepository.GetAll()/*.OrderBy(p => p.Name)*/);
+		}
 
-        // GET: Products/Details/5
-        public IActionResult Details(int? id)
-        {
-            if (id == null)
-            {
-                return NotFound();
-            }
+		// GET: Produtos/Details/5
+		public async Task<IActionResult> Details(int? id)
+		{
+			if (id == null)
+			{
+				return NotFound();
+			}
 
-            var produto = this.repository.GetProduct(id.Value);
-            if (produto == null)
-            {
-                return NotFound();
-            }
+			var product = await this.productRepository.GetByIdAsync(id.Value);
+			if (product == null)
+			{
+				return NotFound();
+			}
 
-            return View(produto);
-        }
+			return View(product);
+		}
 
-        // GET: Products/Create
-        public IActionResult Create()
-        {
-            return View();
-        }
+		// GET: Produtos/Create
+		public IActionResult Create()
+		{
+			return View();
+		}
 
-        // POST: Products/Create
-        // To protect from overposting attacks, please enable the specific properties you want to bind to, for 
-        // more details see http://go.microsoft.com/fwlink/?LinkId=317598.
-        [HttpPost]
-        [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Create([Bind("Id,Name,Price,ImageURL,LastPurchase,LastSale,IsAvailable,Stock")] Product product)
-        {
-            if (ModelState.IsValid)
-            {
-                this.repository.AddProduct(product);
-                await this.repository.SaveAllAsync();
-                return RedirectToAction(nameof(Index));
-            }
-            return View(product);
-        }
+		// POST: Produtos/Create
+		// To protect from overposting attacks, please enable the specific properties you want to bind to, for 
+		// more details see http://go.microsoft.com/fwlink/?LinkId=317598.
+		[HttpPost]
+		[ValidateAntiForgeryToken]
+		public async Task<IActionResult> Create([Bind("Id,Name,Price,ImageURL,LastPurchase,LastSale,IsAvailable,Stock")] Product product)
+		{
+			if (ModelState.IsValid)
+			{
+				await this.productRepository.CreateAsync(product);
+				return RedirectToAction(nameof(Index));
+			}
+			return View(product);
+		}
 
-        // GET: Products/Edit/5
-        public IActionResult Edit(int? id)
-        {
-            if (id == null)
-            {
-                return NotFound();
-            }
+		// GET: Produtos/Edit/5
+		public async Task<IActionResult> Edit(int? id)
+		{
+			if (id == null)
+			{
+				return NotFound();
+			}
 
-            var product = this.repository.GetProduct(id.Value);
-            if (product == null)
-            {
-                return NotFound();
-            }
-            return View(product);
-        }
+			var product = await this.productRepository.GetByIdAsync(id.Value);
+			if (product == null)
+			{
+				return NotFound();
+			}
+			return View(product);
+		}
 
-        // POST: Products/Edit/5
-        // To protect from overposting attacks, please enable the specific properties you want to bind to, for 
-        // more details see http://go.microsoft.com/fwlink/?LinkId=317598.
-        [HttpPost]
-        [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Edit(int id, [Bind("Id, Name, Price, ImageURL, LastPurchase, LastSale, IsAvailable, Stock")] Product product)
-        {
+		// POST: Produtos/Edit/5
+		// To protect from overposting attacks, please enable the specific properties you want to bind to, for 
+		// more details see http://go.microsoft.com/fwlink/?LinkId=317598.
+		[HttpPost]
+		[ValidateAntiForgeryToken]
+		public async Task<IActionResult> Edit(int id, [Bind("Id,Name,Price,ImageURL,LastPurchase,LastSale,IsAvailable,Stock")] Product product)
+		{
 
-            if (ModelState.IsValid)
-            {
-                try
-                {
-                    this.repository.UpdateProduct(product);
-                    await this.repository.SaveAllAsync();
-                }
-                catch (DbUpdateConcurrencyException)
-                {
-                    if (!this.repository.ProductExists(product.Id))
-                    {
-                        return NotFound();
-                    }
-                    else
-                    {
-                        throw;
-                    }
-                }
-                return RedirectToAction(nameof(Index));
-            }
-            return View(product);
-        }
+			if (ModelState.IsValid)
+			{
+				try
+				{
+					await this.productRepository.UpdateAsync(product);
+				}
+				catch (DbUpdateConcurrencyException)
+				{
+					if (!await this.productRepository.ExistsAsync(product.Id))
+					{
+						return NotFound();
+					}
+					else
+					{
+						throw;
+					}
+				}
+				return RedirectToAction(nameof(Index));
+			}
+			return View(product);
+		}
 
-        // GET: Products/Delete/5
-        public IActionResult Delete(int? id)
-        {
-            if (id == null)
-            {
-                return NotFound();
-            }
+		// GET: Produtos/Delete/5
+		public async Task<IActionResult> Delete(int? id)
+		{
+			if (id == null)
+			{
+				return NotFound();
+			}
 
-            var product = this.repository.GetProduct(id.Value);
-            if (product == null)
-            {
-                return NotFound();
-            }
+			var product = await this.productRepository.GetByIdAsync(id.Value);
+			if (product == null)
+			{
+				return NotFound();
+			}
 
-            return View(product);
-        }
+			return View(product);
+		}
 
-        // POST: Products/Delete/5
-        [HttpPost, ActionName("Delete")]
-        [ValidateAntiForgeryToken]
-        public async Task<IActionResult> DeleteConfirmed(int id)
-        {
-            var product = this.repository.GetProduct(id);
-            this.repository.RemoveProduct(product);
-            await this.repository.SaveAllAsync();
-            return RedirectToAction(nameof(Index));
-        }
-    }
+		// POST: Produtos/Delete/5
+		[HttpPost, ActionName("Delete")]
+		[ValidateAntiForgeryToken]
+		public async Task<IActionResult> DeleteConfirmed(int id)
+		{
+			var product = await this.productRepository.GetByIdAsync(id);
+			await this.productRepository.DeleteAsync(product);
+			return RedirectToAction(nameof(Index));
+		}
+
+	}
 }

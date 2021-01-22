@@ -1,12 +1,9 @@
 ﻿using System;
-using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
-using System.Linq;
-using System.Threading.Tasks;
 
 namespace Store.Web.Data.Entities
 {
-    public class Product
+    public class Product:IEntity
     {
         public int Id { get; set; }
 
