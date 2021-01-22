@@ -12,7 +12,7 @@ namespace Store.Web.Data.Entities
 
         [MaxLength(50, ErrorMessage = "The field {0} only can contain {1} characters lenght.")]
         [Required]
-        [Display(Name = "Produto")]
+        [Display(Name = "Product")]
         public string Name { get; set; }
 
 
